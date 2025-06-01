@@ -1,5 +1,5 @@
 from crewai import Agent, Task, Crew
-from crewai_tools import RagTool
+from crewai_tools import RagTool, DirectoryReadTool, FileReadTool
 from textblob import TextBlob
 from pydantic import BaseModel, Field, validator
 from typing import Dict
@@ -86,6 +86,14 @@ class SentimentAnalysisTool(RagTool):
 
 
 def build_crew() -> Crew:
+    """
+    Builds a Crew for sentiment analysis tasks.
+    Returns:
+        Crew: A Crew instance with agents and tasks for sentiment analysis.
+    """
+    # create tools
+    directory_read_tool = DirectoryReadTool(directory='./instructions')
+    file_read_tool = FileReadTool()
     senti_tool = SentimentAnalysisTool()
 
     # create agents
@@ -107,7 +115,7 @@ def build_crew() -> Crew:
     analyze_task = Task(
         description="Analyze the sentiment of the provided text.",
         expected_output="A JSON object containing sentiment analysis results.",
-        tools=[senti_tool],
+        tools=[file_read_tool, directory_read_tool, senti_tool],
         output_json=SentimentAnalysis,
         agent=analyze_agent,
     )
